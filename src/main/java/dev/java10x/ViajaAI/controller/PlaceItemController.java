@@ -23,8 +23,7 @@ public class PlaceItemController {
 
     @PostMapping("/criar")
     public ResponseEntity<PlaceItem> CriarLocal(@RequestBody PlaceItem placeItem) {
-        PlaceItem salvo = service.criar(placeItem);
-        return ResponseEntity.ok(salvo);
+        return ResponseEntity.ok(service.criar(placeItem));
     }
 
     @GetMapping("/listar")
@@ -34,38 +33,32 @@ public class PlaceItemController {
 
     @GetMapping("/listar/{id}")
     public ResponseEntity<?> listarLocal(@PathVariable Long id) {
-        PlaceItem placeItem = service.listarPorId(id);
-
-        if (placeItem != null) {
-            return ResponseEntity.ok(placeItem);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não foi encontrado nenhum local com ID " + id);
-        }
-
+        return service.listarPorId(id)
+            .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> editarLocal(@PathVariable Long id, @RequestBody PlaceItem placeItem) {
-        PlaceItem place = service.listarPorId(id);
+        return service.listarPorId(id)
+                .map(itemExistente -> {
+                    placeItem.setId(id);
+                    service.editar(id, placeItem);
+                    return ResponseEntity.ok(placeItem);
+                }).orElse(ResponseEntity.notFound().build());
 
-        if (place != null) {
-            service.editar(id, placeItem);
-            return ResponseEntity.ok(placeItem);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não foi encontrado nenhum local com ID " + id);
         }
-    }
 
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletarLocal(@PathVariable Long id) {
-        PlaceItem place = service.listarPorId(id);
-
-        if (place != null) {
-            service.deletar(id);
-            return ResponseEntity.ok("Seu local foi deletado com sucesso.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não foi encontrado nenhum local com ID " + id);
-        }
+        return service.listarPorId(id)
+                .map(placeItem -> {
+                    service.deletar(id);
+                    return ResponseEntity.ok("Seu item foi excluído com sucesso.");
+                }).orElse(ResponseEntity.notFound().build());
     }
 
 }
+
+
+
+
