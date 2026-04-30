@@ -24,19 +24,18 @@ public class PlaceItemService {
         return repository.findAll();
     }
 
-    public PlaceItem listarPorId(Long id) {
-        Optional<PlaceItem> place = repository.findById(id);
+    public Optional<PlaceItem> listarPorId(Long id) {
 
-        return place.orElse(null);
+        return repository.findById(id);
+
     }
 
     public PlaceItem editar(Long id, PlaceItem placeItem) {
         Optional<PlaceItem> place = repository.findById(id);
 
         if (place.isPresent()) {
-            PlaceItem placeAtualizado = placeItem;
-            placeAtualizado.setId(id);
-            return repository.save(placeAtualizado);
+            placeItem.setId(id);
+            return repository.save(placeItem);
         }
 
         return null;
