@@ -1,5 +1,6 @@
 package dev.java10x.ViajaAI.service;
 
+import dev.java10x.ViajaAI.model.PlaceItem;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OpenAiService {
@@ -21,8 +23,14 @@ public class OpenAiService {
 
 
 
-    public Mono<String> generateGuide(){
-        String prompt = "Agora você é um guia turístico e vai gerar um guia de viagem com base nos gostos, locais e itens que vou te passar, ok?";
+    public Mono<String> generateGuide(List<PlaceItem> placeitems){
+
+        String pontosDeInteresse = placeitems.stream()
+                .map(item -> String.format("%s - (%s)", item.getNome(), item.getCategoria()))
+                .collect(Collectors.joining("\n"));
+
+
+        String prompt = "Agora você é um guia turístico e vai gerar um guia de viagem com base meu banco de dados que pode conter locais, gostos, interesses, ok?" + pontosDeInteresse;
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4o-mini",
